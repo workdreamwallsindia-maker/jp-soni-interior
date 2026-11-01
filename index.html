@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#18251f"><title>JP SONI INTERIOR</title>
+<style>
+:root{--ink:#18251f;--muted:#68736c;--cream:#f6f4ee;--paper:#fffefa;--gold:#b89458;--line:#e7e3d9}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}
+header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+nav{max-width:1100px;margin:auto;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:Georgia,serif;letter-spacing:.13em}.sub{font:10px Arial;color:var(--muted);letter-spacing:.2em;margin-top:4px}
+button{padding:10px 14px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.primary{background:var(--ink);color:white}.gold{background:var(--gold);border-color:var(--gold);color:white}
+main{max-width:1100px;margin:28px auto;padding:0 20px}.hero{padding:55px 35px;background:linear-gradient(90deg,#18251fe8,#18251f55),url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=80') center/cover;color:white}
+h1,h2{font-family:Georgia,serif;font-weight:400}.hero h1{font-size:clamp(36px,6vw,58px);margin:10px 0}.muted{color:var(--muted);font-size:13px;line-height:1.6}.hero p{max-width:520px;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}.card,.panel{background:var(--paper);border:1px solid var(--line);padding:16px}.card img{width:100%;height:180px;object-fit:cover;background:#ddd}.price{font-weight:bold}.hidden{display:none!important}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;color:var(--muted)}input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);background:white}.admin{margin-top:28px}.notice{background:#f4efe2;padding:12px;font-size:12px;line-height:1.6;margin:12px 0;color:#6d5935}.item{padding:12px 0;border-bottom:1px solid var(--line)}.danger{border-color:#9c4444;color:#9c4444}.tag{font-size:10px;color:var(--gold);letter-spacing:.15em}
+@media(max-width:560px){nav{padding:13px}.hero{padding:35px 22px}main{padding:0 13px}}
+</style>
+</head>
+<body>
+<header><nav><div><div class="brand">JP SONI INTERIOR</div><div class="sub">DESIGN YOUR SPACE</div></div><div class="row"><button id="adminToggle">ADMIN LOGIN</button><button id="logoutBtn" class="hidden">LOG OUT</button></div></nav></header>
+<main>
+<section class="hero"><div class="tag">WALLPAPER • HOME DÉCOR • INTERIOR COLLECTION</div><h1>Make every wall<br>feel extraordinary.</h1><p>Discover selected wallpaper and interior designs for beautiful spaces.</p></section>
+<section><div class="row"><div><h2>Our Collection</h2><p class="muted">Products listed by JP SONI INTERIOR.</p></div><span id="loadState" class="muted"></span></div><div id="products" class="grid"></div></section>
+<section id="adminArea" class="admin hidden">
+ <div class="panel">
+  <div class="row"><div><div class="tag">RESTRICTED AREA</div><h2>Store Admin</h2><p id="whoami" class="muted"></p></div><span id="roleLabel"></span></div>
+  <div id="loginBox">
+   <p class="muted">Owner and approved admins only. Customers cannot access store management.</p>
+   <div class="field"><label>ADMIN EMAIL</label><input id="email" type="email" autocomplete="username" placeholder="admin@example.com"></div>
+   <div class="field"><label>PASSWORD</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"></div>
+   <button id="loginBtn" class="primary">SIGN IN</button><p id="loginMsg" class="muted"></p>
+  </div>
+  <div id="dashboard" class="hidden">
+   <div class="row"><h2>Inventory</h2><button id="refreshBtn">REFRESH</button></div>
+   <div id="inventory"></div>
+   <h2>Add product</h2>
+   <div class="field"><label>PRODUCT NAME</label><input id="pName" placeholder="Wallpaper name"></div>
+   <div class="field"><label>CATEGORY</label><select id="pCategory"><option>Wallpaper</option><option>Wall Panel</option><option>Interior Décor</option><option>Other</option></select></div>
+   <div class="field"><label>PRICE (₹)</label><input id="pPrice" type="number" min="1"></div>
+   <div class="field"><label>STOCK</label><input id="pStock" type="number" min="0"></div>
+   <div class="field"><label>IMAGE URL</label><input id="pImage" type="url" placeholder="https://..."></div>
+   <div class="field"><label>DESCRIPTION</label><textarea id="pDesc" rows="2"></textarea></div>
+   <button id="addBtn" class="primary">ADD PRODUCT</button>
+   <div id="ownerOnly" class="hidden">
+    <hr style="border:0;border-top:1px solid var(--line);margin:25px 0">
+    <div class="tag">OWNER CONTROL</div><h2>Manage Admin Access</h2>
+    <p class="muted">Only the owner can grant or remove admin access. First create the person's sign-in account in Firebase Authentication, then paste their Firebase UID below.</p>
+    <div class="field"><label>EXISTING USER'S FIREBASE UID</label><input id="adminUid" placeholder="Paste exact Firebase Authentication UID"></div>
+    <button id="grantBtn" class="gold">GRANT FULL ADMIN ACCESS</button>
+    <div id="adminList"></div>
+    <p id="ownerMsg" class="muted"></p>
+   </div>
+   <h2>Orders</h2><div id="orders"></div>
+  </div>
+ </div>
+</section>
+<div class="notice">Preview template: live checkout, customer phone OTP, UPI payment collection and email alerts are not connected in this build. Do not accept real payments until those services and server-side order workflows are configured.</div>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,getDocs,addDoc,setDoc,deleteDoc,query,orderBy,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 1) Paste your Firebase web app config here (Firebase Console > Project settings).
+const firebaseConfig = {
+  apiKey: "AIzaSyA1S0zRxT1NVgYkJmQJcu0UMmINr7fIJAY",
+  authDomain: "jp-soni-interior.firebaseapp.com",
+  projectId: "jp-soni-interior",
+  storageBucket: "jp-soni-interior.firebasestorage.app",
+  messagingSenderId: "233059476375",
+  appId: "1:233059476375:web:e5a5231033742a8c685ad2"
+};
+// 2) Must exactly match the OWNER_UID value in firestore.rules.
+const OWNER_UID = " 9x0VNEZSpSZGakWVmwOsyNmmYeT2";
+
+const $ = id => document.getElementById(id);
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+let currentUser=null, currentRole=null;
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+function safe(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function msg(id,t){$(id).textContent=t}
+async function loadProducts(){
+  msg("loadState","Loading…");
+  try{
+    const snap=await getDocs(collection(db,"products"));
+    const items=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.active!==false && Number(p.stock)>0);
+    $("products").innerHTML=items.length?items.map(p=>`<article class="card"><img src="${safe(p.image||"")}" alt="${safe(p.name)}"><div class="tag">${safe(p.category||"Interior")}</div><h3>${safe(p.name)}</h3><p class="muted">${safe(p.description||"")}</p><div class="row"><span class="price">${money(p.price)}</span><span class="muted">${Number(p.stock)} available</span></div></article>`).join(""):"<p class='muted'>No products published yet. Please check back soon.</p>";
+    msg("loadState",items.length+" products");
+  }catch(e){msg("loadState","Connect Firebase to load products.");$("products").innerHTML="<p class='muted'>Store catalogue will appear here after Firebase setup.</p>";}
+}
+async function refreshInventory(){
+ const snap=await getDocs(collection(db,"products"));
+ const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+ $("inventory").innerHTML=rows.length?rows.map(p=>`<div class="item"><div class="row"><b>${safe(p.name)}</b><button class="danger" data-delete="${p.id}">DELETE</button></div><div class="row"><span class="muted">${money(p.price)}</span><label class="muted">Stock <input data-stock="${p.id}" type="number" min="0" value="${Number(p.stock||0)}" style="width:85px"></label><label class="muted">Price <input data-price="${p.id}" type="number" min="0" value="${Number(p.price||0)}" style="width:100px"></label><button data-save="${p.id}">SAVE</button></div></div>`).join(""):"<p class='muted'>No products yet.</p>";
+ $("inventory").querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{const id=b.dataset.save;try{await setDoc(doc(db,"products",id),{stock:Number($("inventory").querySelector(`[data-stock="${id}"]`).value),price:Number($("inventory").querySelector(`[data-price="${id}"]`).value),updatedAt:serverTimestamp()},{merge:true});await refreshInventory();await loadProducts()}catch(e){alert("Could not save. Check Firestore rules and your admin access.")}});
+ $("inventory").querySelectorAll("[data-delete]").forEach(b=>b.onclick=async()=>{if(confirm("Delete this product?")){try{await deleteDoc(doc(db,"products",b.dataset.delete));await refreshInventory();await loadProducts()}catch(e){alert("Delete denied. Only approved admins can manage products.")}}});
+}
+async function refreshOrders(){
+ const snap=await getDocs(query(collection(db,"orders"),orderBy("createdAt","desc")));
+ $("orders").innerHTML=snap.empty?"<p class='muted'>No orders yet.</p>":snap.docs.map(d=>{const o=d.data();return `<div class="item"><b>${safe(o.customerName||"Customer")} · ${money(o.total)}</b><p class="muted">${safe(o.status||"New order")} · ${safe(o.customerPhone||"")}</p></div>`}).join("");
+}
+async function refreshAdminList(){
+ const snap=await getDocs(collection(db,"users"));
+ const admins=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.role==="admin");
+ $("adminList").innerHTML=admins.map(u=>`<div class="item row"><span class="muted">${safe(u.email||u.uid)} · Admin</span><button class="danger" data-revoke="${u.uid}">REMOVE ACCESS</button></div>`).join("")||"<p class='muted'>No extra admins.</p>";
+ $("adminList").querySelectorAll("[data-revoke]").forEach(b=>b.onclick=async()=>{if(confirm("Remove this person's admin access?")){try{await deleteDoc(doc(db,"users",b.dataset.revoke));await refreshAdminList()}catch(e){msg("ownerMsg","Could not remove access. Check owner UID and Firestore rules.")}}});
+}
+$("grantBtn").onclick=async()=>{const uid=$("adminUid").value.trim();if(!uid||uid===OWNER_UID){msg("ownerMsg","Enter a valid non-owner Firebase UID.");return}try{await setDoc(doc(db,"users",uid),{role:"admin",grantedBy:currentUser.uid,grantedAt:serverTimestamp()});$("adminUid").value="";msg("ownerMsg","Admin access granted.");await refreshAdminList()}catch(e){msg("ownerMsg","Could not grant access. Verify this is the owner account and rules are deployed.")}};
+$("addBtn").onclick=async()=>{const name=$("pName").value.trim(),price=Number($("pPrice").value),stock=Number($("pStock").value);if(!name||price<=0||stock<0){alert("Enter a name, valid price and stock.");return}try{await addDoc(collection(db,"products"),{name,price,stock,category:$("pCategory").value,image:$("pImage").value.trim(),description:$("pDesc").value.trim(),active:true,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});["pName","pPrice","pStock","pImage","pDesc"].forEach(id=>$(id).value="");await refreshInventory();await loadProducts()}catch(e){alert("Could not add product. Check admin access and Firestore rules.")}};
+$("loginBtn").onclick=async()=>{msg("loginMsg","Signing in…");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);msg("loginMsg","")}catch(e){msg("loginMsg","Sign-in failed. Check email/password and Firebase Authentication setup.")}};
+$("adminToggle").onclick=()=>{$("adminArea").classList.toggle("hidden");$("adminArea").scrollIntoView({behavior:"smooth"})};
+$("logoutBtn").onclick=()=>signOut(auth);
+$("refreshBtn").onclick=async()=>{await refreshInventory();await refreshOrders();if(currentRole==="owner")await refreshAdminList();await loadProducts()};
+onAuthStateChanged(auth,async user=>{
+ currentUser=user;currentRole=null;
+ $("loginBox").classList.toggle("hidden",!!user);$("dashboard").classList.add("hidden");
+ $("logoutBtn").classList.toggle("hidden",!user);$("adminToggle").textContent=user?"ADMIN PANEL":"ADMIN LOGIN";
+ if(!user){$("whoami").textContent="";return}
+ try{
+  if(user.uid===OWNER_UID)currentRole="owner";
+  else {const s=await getDoc(doc(db,"users",user.uid));if(s.exists()&&s.data().role==="admin")currentRole="admin"}
+  if(!currentRole){await signOut(auth);msg("loginMsg","This account has not been approved by the owner.");return}
+  $("dashboard").classList.remove("hidden");$("whoami").textContent=user.email||user.uid;$("roleLabel").textContent=currentRole==="owner"?"OWNER":"ADMIN";
+  $("ownerOnly").classList.toggle("hidden",currentRole!=="owner");
+  await refreshInventory();await refreshOrders();if(currentRole==="owner")await refreshAdminList();
+ }catch(e){msg("loginMsg","Could not verify permissions. Check Firebase configuration and rules.")}
+});
+loadProducts();
+</script>
+</body></html>
